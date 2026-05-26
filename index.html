@@ -686,12 +686,35 @@
         let exploredCount = 0;
         const totalSprites = interactiveSprites.length;
 
+        // ===== SOPORTE MOUSE Y TOUCH =====
+        let touchStartX = 0, touchStartY = 0;
+        let isTap = false;
+
+        // Mouse move (escritorio)
         window.addEventListener('mousemove', (event) => {
             mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
             mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
         });
 
-        window.addEventListener('click', () => {
+        // Touch start — guardar posición para detectar tap vs scroll
+        window.addEventListener('touchstart', (event) => {
+            touchStartX = event.touches[0].clientX;
+            touchStartY = event.touches[0].clientY;
+            isTap = true;
+            // Actualizar mouse con la posición del touch
+            mouse.x = (event.touches[0].clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.touches[0].clientY / window.innerHeight) * 2 + 1;
+        }, { passive: true });
+
+        // Touch move — si se mueve mucho no es tap
+        window.addEventListener('touchmove', (event) => {
+            const dx = Math.abs(event.touches[0].clientX - touchStartX);
+            const dy = Math.abs(event.touches[0].clientY - touchStartY);
+            if (dx > 10 || dy > 10) isTap = false;
+        }, { passive: true });
+
+        // Función compartida para abrir carta
+        function handleInteraction() {
             if (cardModal.classList.contains('active')) return;
             raycaster.setFromCamera(mouse, camera);
             const intersects = raycaster.intersectObjects(interactiveSprites);
@@ -699,13 +722,8 @@
                 const sprite = intersects[0].object;
                 const data = sprite.userData.data;
 
-                // Marcar como explorado
                 if (!sprite.userData.explored) {
                     sprite.userData.explored = true;
-                    exploredCount++;
-                    document.getElementById('explored-count').textContent = exploredCount;
-                    document.getElementById('progress-bar-fill').style.width = (exploredCount / totalSprites * 100) + '%';
-                    // Cambiar aura a azul cielo
                     rebuildSpriteTexture(sprite, sprite.userData.data.emoji, '#87ceeb');
                 }
 
@@ -719,28 +737,45 @@
                 document.getElementById('card-subtext').innerText = data.sub;
                 cardModal.classList.add('active');
             }
+        }
+
+        // Click (escritorio)
+        window.addEventListener('click', handleInteraction);
+
+        // Touch end (móvil)
+        window.addEventListener('touchend', (event) => {
+            if (!isTap) return;
+            // Actualizar mouse con posición del último touch
+            const touch = event.changedTouches[0];
+            mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+            handleInteraction();
         });
 
-        document.getElementById('btn-close').addEventListener('click', () => {
+        // Función para cerrar carta
+        function cerrarCarta() {
             cardModal.classList.remove('active');
-            // Contar cuántos sprites están realmente explorados
             const realExplored = interactiveSprites.filter(s => s.userData.explored).length;
             document.getElementById('explored-count').textContent = realExplored;
             document.getElementById('progress-bar-fill').style.width = (realExplored / interactiveSprites.length * 100) + '%';
             exploredCount = realExplored;
-            // Mostrar pantalla final cuando todos estén explorados
             if (realExplored >= interactiveSprites.length) {
                 setTimeout(() => {
                     document.getElementById('final-screen').classList.add('visible');
                     playMusic();
                 }, 800);
             }
-        });
+        }
 
-        document.getElementById('btn-final-close').addEventListener('click', () => {
-            document.getElementById('final-screen').classList.remove('visible');
-            pauseMusic();
-        });
+        // Cerrar carta — click y touch
+        const btnClose = document.getElementById('btn-close');
+        btnClose.addEventListener('click', cerrarCarta);
+        btnClose.addEventListener('touchend', (e) => { e.preventDefault(); cerrarCarta(); });
+
+        // Cerrar pantalla final — click y touch
+        const btnFinalClose = document.getElementById('btn-final-close');
+        btnFinalClose.addEventListener('click', () => { document.getElementById('final-screen').classList.remove('visible'); pauseMusic(); });
+        btnFinalClose.addEventListener('touchend', (e) => { e.preventDefault(); document.getElementById('final-screen').classList.remove('visible'); pauseMusic(); });
 
         // ===== ANIMACIÓN =====
         const clock = new THREE.Clock();
