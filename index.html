@@ -306,14 +306,14 @@
         }
     </style>
 
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-            }
-        }
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://unpkg.com/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+    <script src="https://unpkg.com/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
 </head>
 <body>
 
@@ -423,12 +423,9 @@
 
     <div id="canvas-container"></div>
 
-    <script type="module">
-        import * as THREE from 'three';
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+    <script>
+        // Three.js r128 UMD — addons en THREE namespace
+        const { OrbitControls, EffectComposer, RenderPass, UnrealBloomPass } = THREE;
 
         // ===== CONTADOR DE DÍAS =====
         function calcularDias() {
@@ -472,8 +469,7 @@
         }
 
         const frasesData = [
-           
-           { titulo: "Tu sonrisa", sub: "Esa sonrisa tuya que me desarmó desde el primer día y que nunca me canso de ver." },
+            { titulo: "Tu sonrisa", sub: "Esa sonrisa tuya que me desarmó desde el primer día y que nunca me canso de ver." },
             { titulo: "Tus rizitos lindos", sub: "Los rizitos más lindos de este mundo — los que me vuelven loco cada vez que los veo." },
             { titulo: "Tu mirada", sub: "En tus ojos encuentro un universo entero que solo existe para mí." },
             { titulo: "Tu sonrisa perfecta", sub: "Cuando te ríes, el mundo se detiene y solo existes tú, verte reir, para mi es lo más hermoso." },
@@ -529,7 +525,6 @@
             { titulo: "Tu presencia que lo llena todo", sub: "Cuando estás cerca, no necesito nada más para ser completamente feliz." },
             { titulo: "Tus sueños", sub: "Quiero estar ahí para ver todos tus sueños convertirse en realidad, esa gran Administradora de empresas." },
             { titulo: "Que existas", sub: "El simple hecho de que existas hace que este universo sea un lugar mejor." }
-        ];
         ];
 
         // Asignar emoji único por posición — cicla la lista mezclada
@@ -634,7 +629,7 @@
             ctx.fillStyle = '#ffffff';
             ctx.fillText(emojiText, 256, 275);
             const texture = new THREE.CanvasTexture(canvas);
-            texture.colorSpace = THREE.SRGBColorSpace;
+            texture.encoding = THREE.sRGBEncoding;
             const material = new THREE.SpriteMaterial({ map: texture, transparent: true, blending: THREE.NormalBlending, depthWrite: false });
             const sprite = new THREE.Sprite(material);
             sprite.scale.set(16, 16, 1);
@@ -660,7 +655,7 @@
             ctx.fillStyle = '#ffffff';
             ctx.fillText(emojiText, 256, 275);
             const texture = new THREE.CanvasTexture(canvas);
-            texture.colorSpace = THREE.SRGBColorSpace;
+            texture.encoding = THREE.sRGBEncoding;
             // Dispose old texture to free memory
             if (sprite.material.map) sprite.material.map.dispose();
             sprite.material.map = texture;
