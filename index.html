@@ -306,14 +306,15 @@
         }
     </style>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://unpkg.com/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
-    <script src="https://unpkg.com/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
-    <script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
-    <script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
-    <script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
-    <script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+    <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
 </head>
 <body>
 
@@ -423,9 +424,13 @@
 
     <div id="canvas-container"></div>
 
-    <script>
-        // Three.js r128 UMD — addons en THREE namespace
-        const { OrbitControls, EffectComposer, RenderPass, UnrealBloomPass } = THREE;
+    <script type="module">
+        // Three.js via ES modules (jsdelivr)
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
         // ===== CONTADOR DE DÍAS =====
         function calcularDias() {
@@ -629,7 +634,7 @@
             ctx.fillStyle = '#ffffff';
             ctx.fillText(emojiText, 256, 275);
             const texture = new THREE.CanvasTexture(canvas);
-            texture.encoding = THREE.sRGBEncoding;
+            texture.colorSpace = THREE.SRGBColorSpace;
             const material = new THREE.SpriteMaterial({ map: texture, transparent: true, blending: THREE.NormalBlending, depthWrite: false });
             const sprite = new THREE.Sprite(material);
             sprite.scale.set(16, 16, 1);
@@ -655,7 +660,7 @@
             ctx.fillStyle = '#ffffff';
             ctx.fillText(emojiText, 256, 275);
             const texture = new THREE.CanvasTexture(canvas);
-            texture.encoding = THREE.sRGBEncoding;
+            texture.colorSpace = THREE.SRGBColorSpace;
             // Dispose old texture to free memory
             if (sprite.material.map) sprite.material.map.dispose();
             sprite.material.map = texture;
