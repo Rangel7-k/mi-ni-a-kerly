@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Para Kerly — El amor de mi vida</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Montserrat:wght@200;300;400&family=Cormorant+Garamond:ital,wght@1,300;1,400&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #ffb3c6;
+            --secondary: #ff809f;
+            --accent: #ffd1dc;
+            --deep: #ff5580;
+            --text-glow: 0 0 15px rgba(255, 179, 198, 0.7), 0 0 35px rgba(255, 128, 159, 0.5);
+            --gold: #f9d98a;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            background-color: #030102; 
+            font-family: 'Montserrat', sans-serif; 
+            color: white; 
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ===== CONTADOR ===== */
+        #love-counter {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 60;
+            text-align: center;
+            opacity: 0;
+            animation: fadeInDown 2s ease forwards 3.5s;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        #love-counter .days-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--gold);
+            text-shadow: 0 0 20px rgba(249,217,138,0.6);
+            line-height: 1;
+        }
+        #love-counter .days-label {
+            font-size: 0.6rem;
+            letter-spacing: 4px;
+            color: rgba(255,179,198,0.7);
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        @keyframes fadeInDown { 
+            from { opacity: 0; transform: translateX(-50%) translateY(-10px); } 
+            to { opacity: 1; transform: translateX(-50%) translateY(0); } 
+        }
+        
+        #canvas-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
+
+        /* ===== PANTALLA DE INICIO ===== */
+        #intro-screen {
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: radial-gradient(circle at center, rgba(40,5,20,0.85) 0%, rgba(0,0,0,1) 100%);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 0;
+            z-index: 100; transition: opacity 2.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #intro-screen .for-label {
+            font-size: 0.7rem;
+            letter-spacing: 6px;
+            color: rgba(255,179,198,0.5);
+            text-transform: uppercase;
+            opacity: 0;
+            animation: fadeIn 2s ease forwards 0.3s;
+            margin-bottom: 12px;
+        }
+        
+        #intro-screen h1 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-style: italic;
+            font-size: clamp(3rem, 10vw, 5.5rem);
+            letter-spacing: 3px; 
+            margin-bottom: 6px;
+            text-align: center;
+            text-shadow: var(--text-glow);
+            color: var(--accent);
+            opacity: 0;
+            animation: fadeIn 3s ease forwards 0.6s;
+            line-height: 1.1;
+        }
+
+        #intro-screen .subtitle {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: clamp(1rem, 3vw, 1.4rem);
+            color: rgba(255,209,220,0.7);
+            margin-bottom: 50px;
+            opacity: 0;
+            animation: fadeIn 3s ease forwards 1.1s;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .intro-divider {
+            width: 60px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            margin-bottom: 50px;
+            opacity: 0;
+            animation: fadeIn 2s ease forwards 1.4s;
+        }
+
+        @keyframes fadeIn { to { opacity: 1; transform: none; } }
+
+        #btn-enter {
+            padding: 14px 50px;
+            font-size: 0.85rem;
+            font-weight: 300;
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid rgba(255, 179, 198, 0.4);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.5s ease; 
+            font-family: 'Montserrat', inherit;
+            letter-spacing: 5px;
+            box-shadow: 0 0 25px rgba(255, 179, 198, 0.08);
+            opacity: 0;
+            animation: fadeIn 3s ease forwards 1.8s;
+            text-transform: uppercase;
+        }
+
+        #btn-enter:hover { 
+            background: rgba(255, 179, 198, 0.1); 
+            border-color: var(--primary); 
+            box-shadow: var(--text-glow); 
+            transform: scale(1.05); 
+        }
+
+        /* ===== TARJETA DE MENSAJE ===== */
+        #message-card {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -40%) scale(0.95);
+            width: 88%; max-width: 460px; padding: 50px 40px; text-align: center;
+            background: linear-gradient(135deg, rgba(30, 5, 18, 0.75) 0%, rgba(8, 3, 8, 0.92) 100%);
+            backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 179, 198, 0.25);
+            border-radius: 30px;
+            box-shadow: 0 30px 70px rgba(0,0,0,0.9), inset 0 0 40px rgba(255, 179, 198, 0.07), 0 0 0 1px rgba(255,255,255,0.03);
+            z-index: 50; opacity: 0; pointer-events: none; transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        
+        #message-card.active { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+
+        #card-icon { font-size: 3.5rem; margin-bottom: 12px; filter: drop-shadow(0 0 20px rgba(255,179,198,0.8)); }
+
+        #card-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 4px; 
+            color: var(--primary);
+            margin-bottom: 18px;
+            text-transform: uppercase;
+        }
+
+        #card-text { 
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 1.75rem;
+            line-height: 1.5; 
+            font-weight: 300;
+            margin-bottom: 12px;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        #card-subtext {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 300;
+            color: rgba(255,209,220,0.55);
+            line-height: 1.6;
+            margin-bottom: 35px;
+            letter-spacing: 0.5px;
+        }
+
+        #btn-close {
+            background: transparent; border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.7);
+            padding: 10px 32px; border-radius: 30px; cursor: pointer; font-family: 'Montserrat', sans-serif;
+            font-size: 0.72rem; letter-spacing: 3px; transition: 0.4s; font-weight: 300; text-transform: uppercase;
+        }
+
+        #btn-close:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.5); color: #fff; box-shadow: 0 0 15px rgba(255,255,255,0.1); }
+
+
+        /* ===== MÚSICA ===== */
+        #music-player {
+            position: fixed; bottom: 22px; right: 22px; z-index: 70;
+            display: flex; align-items: center; gap: 10px;
+            opacity: 0; animation: fadeInDown 2s ease forwards 4.2s;
+        }
+        #btn-music {
+            width: 40px; height: 40px; border-radius: 50%;
+            border: 1px solid rgba(255,179,198,0.35); background: rgba(10,3,8,0.8);
+            color: var(--primary); font-size: 1rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.4s; backdrop-filter: blur(10px);
+        }
+        #btn-music:hover { border-color: var(--primary); box-shadow: 0 0 15px rgba(255,179,198,0.3); }
+        #music-label { font-size: 0.58rem; letter-spacing: 2px; color: rgba(255,179,198,0.4); text-transform: uppercase; }
+        .music-bars { display: flex; gap: 2px; align-items: flex-end; height: 14px; }
+        .music-bars span { display: block; width: 3px; border-radius: 2px; background: var(--primary); animation: bar 0.8s ease-in-out infinite alternate; opacity: 0.6; }
+        .music-bars span:nth-child(1) { height: 6px; animation-delay: 0s; }
+        .music-bars span:nth-child(2) { height: 12px; animation-delay: 0.15s; }
+        .music-bars span:nth-child(3) { height: 8px; animation-delay: 0.3s; }
+        .music-bars span:nth-child(4) { height: 14px; animation-delay: 0.1s; }
+        .music-bars.paused span { animation-play-state: paused; }
+        @keyframes bar { from { transform: scaleY(0.4); } to { transform: scaleY(1); } }
+
+        /* ===== PANTALLA FINAL ===== */
+        #final-screen {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: radial-gradient(circle at center, rgba(50,5,25,0.98) 0%, rgba(2,0,3,1) 100%);
+            backdrop-filter: blur(20px);
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            overflow-y: auto; z-index: 200; opacity: 0; pointer-events: none;
+            transition: opacity 2s ease; padding: 60px 30px 60px; text-align: center;
+        }
+        #final-screen::-webkit-scrollbar { width: 3px; }
+        #final-screen::-webkit-scrollbar-thumb { background: rgba(255,179,198,0.2); border-radius: 3px; }
+        #final-screen.visible { opacity: 1; pointer-events: auto; }
+        #final-screen .final-icon { font-size: 4rem; margin-bottom: 20px; flex-shrink: 0; animation: heartbeat 1.5s ease-in-out infinite; filter: drop-shadow(0 0 30px rgba(255,80,128,0.8)); }
+        @keyframes heartbeat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+        #final-screen h2 { font-family: 'Playfair Display', serif; font-style: italic; font-size: clamp(2rem, 6vw, 3.2rem); color: var(--accent); text-shadow: var(--text-glow); margin-bottom: 35px; line-height: 1.2; flex-shrink: 0; }
+        #final-screen .final-message { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: clamp(1.05rem, 2.8vw, 1.35rem); line-height: 2; color: rgba(255,220,230,0.88); max-width: 620px; margin-bottom: 45px; text-align: left; }
+        #final-screen .final-message .parrafo { margin-bottom: 1.6em; display: block; }
+        #final-screen .final-message .highlight { color: var(--accent); font-weight: 400; }
+        #final-screen .signature { font-family: 'Montserrat', sans-serif; font-size: 0.72rem; letter-spacing: 4px; color: rgba(255,179,198,0.4); text-transform: uppercase; margin-bottom: 40px; flex-shrink: 0; }
+        #btn-final-close { padding: 13px 45px; font-size: 0.8rem; font-weight: 300; background: transparent; color: var(--accent); border: 1px solid rgba(255,179,198,0.35); border-radius: 50px; cursor: pointer; font-family: 'Montserrat', sans-serif; letter-spacing: 4px; transition: all 0.4s ease; text-transform: uppercase; flex-shrink: 0; margin-bottom: 20px; }
+        #btn-final-close:hover { background: rgba(255,179,198,0.08); box-shadow: var(--text-glow); }
+
+        /* ===== PROGRESS HINT ===== */
+        #progress-hint {
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 60;
+            text-align: center;
+            opacity: 0;
+            animation: fadeInDown 2s ease forwards 4s;
+            pointer-events: none;
+        }
+        #progress-hint .hint-text {
+            font-size: 0.6rem;
+            letter-spacing: 3px;
+            color: rgba(255,179,198,0.4);
+            text-transform: uppercase;
+        }
+        #progress-bar-wrap {
+            width: 120px;
+            height: 1px;
+            background: rgba(255,179,198,0.15);
+            margin: 8px auto 0;
+            border-radius: 1px;
+            overflow: hidden;
+        }
+        #progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--secondary), var(--accent));
+            transition: width 0.5s ease;
+        }
+
+        /* ===== CROSSHAIR ===== */
+        #crosshair {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.25);
+            z-index: 40; pointer-events: none; transition: 0.3s ease;
+        }
+        #crosshair.active { background: rgba(255,255,255,1); box-shadow: 0 0 15px var(--primary); transform: translate(-50%, -50%) scale(2); }
+
+        /* ===== PARTICLES OVERLAY ===== */
+        #particles-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 2; pointer-events: none; overflow: hidden;
+        }
+        .float-particle {
+            position: absolute;
+            font-size: 1rem;
+            opacity: 0;
+            animation: floatUp linear infinite;
+            pointer-events: none;
+        }
+        @keyframes floatUp {
+            0% { opacity: 0; transform: translateY(0) scale(0.5); }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.2; }
+            100% { opacity: 0; transform: translateY(-100vh) scale(1.2); }
+        }
+    </style>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body>
+
+    <!-- Pantalla de inicio -->
+    <div id="intro-screen">
+        <p class="for-label">Para siempre</p>
+        <h1>Kerly</h1>
+        <p class="subtitle">Eres el tatuaje de mi alma y el amor de mi vida</p>
+        <div class="intro-divider"></div>
+        <button id="btn-enter">Ábrelo con amor</button>
+    </div>
+
+    <!-- Contador de días -->
+    <div id="love-counter">
+        <div class="days-number" id="days-count">0</div>
+        <div class="days-label">días amándote</div>
+    </div>
+
+    <!-- Hint de progreso -->
+    <div id="progress-hint">
+        <div class="hint-text">Explora los destellos ✦ <span id="explored-count">0</span> / 55</div>
+        <div id="progress-bar-wrap"><div id="progress-bar-fill"></div></div>
+    </div>
+
+    <div id="crosshair"></div>
+
+    <!-- Tarjeta de mensaje -->
+    <div id="message-card">
+        <div id="card-icon">✨</div>
+        <div id="card-title">Por qué eres irremplazable</div>
+        <p id="card-text">Mensaje</p>
+        <p id="card-subtext"></p>
+        <button id="btn-close">Cerrar</button>
+    </div>
+
+    <!-- Audio local -->
+    <audio id="audio-player" loop preload="auto">
+        <source src="te_voy_a_amar.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Control de música -->
+    <div id="music-player">
+        <div class="music-bars paused" id="music-bars">
+            <span></span><span></span><span></span><span></span>
+        </div>
+        <div id="music-label">Te voy a amar</div>
+        <button id="btn-music">♪</button>
+    </div>
+
+    <!-- Pantalla final (se activa al explorar todos) -->
+    <div id="final-screen">
+        <div class="final-icon">🩵</div>
+        <h2>Mi irremplazable</h2>
+        <div class="final-message">
+            <span class="parrafo">
+                Kerly, has descubierto cada destello de esta galaxia,
+                como yo descubro algo nuevo que amar en ti cada día.
+                Y aun así, sé que no he sido a la altura de todo lo que tú mereces.
+            </span>
+            <span class="parrafo">
+                Sé que lo he echado a perder. Que volví a romper tu confianza,
+                y que fui yo — quien más te debía cuidar — quien te lastimó.
+                Eso me duele de una forma que no sé cómo explicar,
+                porque no lo mereces. Nunca lo mereciste.
+            </span>
+            <span class="parrafo">
+                Me encantaba todo lo que éramos. Esos días que estuvimos solos
+                fueron de los más bonitos de mi vida — no solo por la intimidad,
+                sino por la <span class="highlight">conexión</span>.
+                Por pasar el día entero contigo, verte, tenerte ahí para mí.
+                Por probar tu comida, ayudarte en la casa,
+                acostarnos abrazados. Me hacía completamente feliz.
+                Y me encantaría seguir así contigo.
+            </span>
+            <span class="parrafo">
+                Me has dicho que alejarnos sería una solución.
+                Pero <span class="highlight">he elegido quedarme.</span>
+                No como excusa, no como palabras vacías —
+                sino porque quiero luchar. Porque quiero preservar lo que somos.
+                Aunque no me creas ahora. Aunque dudes. Aunque tarde. Aunque cueste.
+            </span>
+            <span class="parrafo">
+                No me hacen falta razones para elegirte —
+                me hacen falta rodillas para pedirte perdón.
+                Y aunque eso no cambie lo que pasó,
+                quiero estar ahí. Mejorar de verdad, de frente,
+                que lo puedas ver tú misma, sin que yo te lo tenga que decir.
+            </span>
+            <span class="parrafo">
+                Eres <span class="highlight">los rizitos más lindos de este mundo.</span>
+                El tatuaje de mi alma que nadie me puede borrar.
+                Y en algún futuro — cuando hayas podido sanar,
+                cuando yo haya demostrado con hechos lo que hoy solo te puedo prometer —
+                <span class="highlight">quiero volver a estar contigo. Como el primer día de nuestra cita.</span>
+            </span>
+            <span class="parrafo">
+                Te amo tanto, Kerly. De verdad. No hay universo donde eso cambie.
+                No quiero perderte nunca. Estoy dispuesto a esperar lo que haga falta.
+            </span>
+        </div>
+        <p class="signature">Con todo mi amor, para siempre &mdash; Yesid</p>
+        <button id="btn-final-close">Volver a nuestra galaxia</button>
+    </div>
+
+    <!-- Partículas flotantes -->
+    <div id="particles-overlay"></div>
+
+    <div id="canvas-container"></div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+        // ===== CONTADOR DE DÍAS =====
+        function calcularDias() {
+            const inicio = new Date('2024-01-06T00:00:00');
+            const hoy = new Date();
+            const diff = Math.floor((hoy - inicio) / (1000 * 60 * 60 * 24));
+            return diff;
+        }
+        document.getElementById('days-count').textContent = calcularDias().toLocaleString();
+
+        // ===== PARTÍCULAS FLOTANTES =====
+        const particlesEl = document.getElementById('particles-overlay');
+        const particleEmojis = ['🩵','❤️‍🩹','✨','💫','🌷','🫀','♡','🦋'];
+        function spawnParticle() {
+            const p = document.createElement('div');
+            p.className = 'float-particle';
+            p.textContent = particleEmojis[Math.floor(Math.random() * particleEmojis.length)];
+            p.style.left = Math.random() * 100 + 'vw';
+            p.style.bottom = '-30px';
+            p.style.fontSize = (0.6 + Math.random() * 0.8) + 'rem';
+            const dur = 8 + Math.random() * 12;
+            p.style.animationDuration = dur + 's';
+            p.style.animationDelay = Math.random() * 3 + 's';
+            particlesEl.appendChild(p);
+            setTimeout(() => p.remove(), (dur + 3) * 1000);
+        }
+        setInterval(spawnParticle, 1200);
+
+        // ===== BASE DE DATOS EMOCIONAL =====
+        // Emojis únicos ciclados — 55 frases, 19 emojis → cicla sin repetir consecutivos
+        const emojisPosibles = ['🩵','❤️‍🩹','🫀','🥺','🥰','🥹','✨','🌹','🌸','🫶','💫','♡','🦋','🌷','🌟','💌','😍','🎀','💝'];
+        const paletaColores = ['#ffb3c6','#ff809f','#ffd1dc','#ffffff','#ff99b3','#f9d98a'];
+        // Mezclar emojis aleatoriamente una sola vez para que no haya patrones obvios
+        function shuffleArray(arr) {
+            const a = [...arr];
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        const frasesData = [
+           
+           { titulo: "Tu sonrisa", sub: "Esa sonrisa tuya que me desarmó desde el primer día y que nunca me canso de ver." },
+            { titulo: "Tus rizitos lindos", sub: "Los rizitos más lindos de este mundo — los que me vuelven loco cada vez que los veo." },
+            { titulo: "Tu mirada", sub: "En tus ojos encuentro un universo entero que solo existe para mí." },
+            { titulo: "Tu sonrisa perfecta", sub: "Cuando te ríes, el mundo se detiene y solo existes tú, verte reir, para mi es lo más hermoso." },
+            { titulo: "tu voz", sub: "Tan solo escucharte, tan solo cruzar contigo unas palabras, me llena de felicidad." },
+            { titulo: "Tu inteligencia", sub: "Me enamoras cada vez que hablas, porque tu mente es tan hermosa como tú,eres mucho más inteligente de lo que crees." },
+            { titulo: "Tu sentido del humor", sub: "Tu y yo, tenemos una conexión única que nos hace reír juntos, amo tu humor." },
+            { titulo: "Tus abrazos que curan todo", sub: "Cuando me abrazas, desaparecen todas las preocupaciones del mundo, ahora mismo los extraño demasiado, solo quiero estar contigo." },
+            { titulo: "La paz que me das", sub: "Contigo he aprendido lo que significa sentirse en casa." },
+            { titulo: "Tu bondad desinteresada", sub: "Tu corazón es el más puro que he conocido en mi vida." },
+            { titulo: "Tu locura divertida", sub: "Me encanta tu forma de ser loquita y auténtica, nunca cambies, me gustan esos bailes cada vez que comes lo que te gusta." },
+            { titulo: "Tu fuerza inquebrantable", sub: "Eres más fuerte de lo que crees, y eso me llena de orgullo." },
+            { titulo: "Tu forma de hablarme", sub: "Hay una dulzura en ti que me derrite cada vez que me diriges la palabra, desearia tener más tiempo contigo." },
+            { titulo: "Tu apoyo incondicional", sub: "Simplemente con que estes ahí, lo es todo para mí." },
+            { titulo: "La suavidad de tus manos", sub: "Cada vez que me tomas la mano, siento que todo está bien en el mundo." },
+            { titulo: "Tus caricias inesperadas", sub: "Esos momentos en que me tocas sin razón son mis favoritos del día." },
+            { titulo: "Tu aroma que me encanta", sub: "Tu olor es el más bonito del mundo y me hace volverte a buscar, y mas cuando te echas colonia jskjs." },
+            { titulo: "Cómo me haces sentir único", sub: "Contigo me siento el hombre más afortunado del universo." },
+            { titulo: "Tu maravillosa compañía", sub: "No necesito más que estar a tu lado para ser completamente feliz." },
+            { titulo: "Tus pequeños detalles", sub: "Son esos detalles pequeños los que hacen que te ame más cada día de mi vida." },
+            { titulo: "Tu forma tan pura de amar", sub: "Nunca había conocido a alguien que amara como tú lo haces." },
+            { titulo: "Tu sinceridad total", sub: "Tu honestidad es uno de los regalos más grandes que me has dado." },
+            { titulo: "Tu lealtad absoluta", sub: "Contigo aprendí lo que significa tener a alguien de verdad." },
+            { titulo: "La confianza que me inspiras", sub: "Eres la única persona con quien puedo ser yo mismo completamente." },
+            { titulo: "Tu valentía ante los retos", sub: "Me enseñas todos los días que los obstáculos se pueden superar." },
+            { titulo: "Tu perseverancia", sub: "Ver cómo luchas por lo que quieres me inspira a ser mejor." },
+            { titulo: "Tu fe en nosotros", sub: "Creer juntos en lo que somos es lo más poderoso que tenemos." },
+            { titulo: "Tu autenticidad", sub: "Nunca tratas de ser otra persona, y eso es lo más hermoso de ti." },
+            { titulo: "Tus grandes sueños", sub: "Quiero ser parte de cada uno de tus sueños y ayudarte a cumplirlos." },
+            { titulo: "Tu resiliencia", sub: "Has demostrado que puedes con todo, y siempre sales adelante." },
+            { titulo: "Tu sabiduría", sub: "Hablar contigo siempre me deja algo nuevo en el alma." },
+            { titulo: "Tu hermosa sensibilidad", sub: "Eres esa niña que me gustaria tener siempre a mi lado." },
+            { titulo: "Cómo te emocionas por lo simple", sub: "Ver cómo te alegras con cosas pequeñas es mi alegría más linda." },
+            { titulo: "Tus gestos tan tuyos", sub: "Hay cosas que solo tú haces y que me roban el corazón cada vez,simplemente eres tu." },
+            { titulo: "Tu forma de despertar", sub: "Incluso recién despierta eres la persona más hermosa que he visto." },
+            { titulo: "Tu carita cuando comes algo rico", sub: "Esa expresión tuya me hace sonreír sin poder evitarlo." },
+            { titulo: "Tus mensajes de buenos días", sub: "Empezar el día con un mensaje tuyo hace que todo valga la pena." },
+            { titulo: "Tu forma de cuidarme", sub: "Me cuidas como nadie me había cuidado antes, quiero hacer lo mismo por ti." },
+            { titulo: "Tu forma de animarme cuando caigo", sub: "Siempre encuentras las palabras que me hacen levantarme cuando caigo." },
+            { titulo: "Tu facilidad para hacerme reír", sub: "Nadie en el mundo me hace reír como tú lo haces, solo tu tienes toda mi felicidad entera." },
+            { titulo: "El tatuaje de mi alma", sub: "Eres el tatuaje de mi alma — algo que llevo en mí para siempre, sin importar nada." },
+            { titulo: "Mi irremplazable", sub: "No existe nadie como tú en este universo, y nunca lo habrá. Eres única en mi vida." },
+            { titulo: "El amor de mi vida", sub: "De todas las personas que existen, tú eres el amor de mi vida. A ciegas." },
+            { titulo: "Que nunca te quiero perder", sub: "Tenerte en mi vida es lo más valioso que tengo. No quiero perderte jamás, luchare por ti, cueste lo que cueste." },
+            { titulo: "Tu forma de decir mi nombre", sub: "Yesid, yesid, solo escuchar eso de ti, me llena de felicidad." },
+            { titulo: "Que me elegiste a mí", sub: "De todos los caminos que podías tomar, elegiste el mío. Gracias por eso." },
+            { titulo: "Tu forma de querer", sub: "Amar como tú amas es un don que no todo el mundo tiene." },
+            { titulo: "Que seas exactamente tú", sub: "No quiero que cambies nada. Eres perfecta siendo exactamente quien eres." },
+            { titulo: "Tu forma de sorprenderme", sub: "Siempre encuentras la manera de dejarme sin palabras." },
+            { titulo: "La paz de estar contigo", sub: "Contigo he encontrado la paz que tanto buscaba. Gracias por existir." },
+            { titulo: "Tu forma de protegerme", sub: "Me haces sentir que no estoy solo, y eso es lo más hermoso del mundo, yo tambien quiero protegerte." },
+            { titulo: "Tus locuras conmigo", sub: "Los momentos locos que vivimos juntos son mis recuerdos favoritos." },
+            { titulo: "Lo que aprendí contigo", sub: "Contigo he aprendido a amar de verdad, sin miedos, sin reservas, aunque se el gran error que cometi, de verdad quiero ser esa mejor persona para ti." },
+            { titulo: "Tu presencia que lo llena todo", sub: "Cuando estás cerca, no necesito nada más para ser completamente feliz." },
+            { titulo: "Tus sueños", sub: "Quiero estar ahí para ver todos tus sueños convertirse en realidad, esa gran Administradora de empresas." },
+            { titulo: "Que existas", sub: "El simple hecho de que existas hace que este universo sea un lugar mejor." }
+        ];
+        ];
+
+        // Asignar emoji único por posición — cicla la lista mezclada
+        const emojismezclados = shuffleArray(emojisPosibles);
+        const interactiveData = frasesData.map((item, i) => ({
+            id: i,
+            emoji: emojismezclados[i % emojismezclados.length],
+            color: paletaColores[i % paletaColores.length],
+            title: item.titulo,
+            card: item.titulo,
+            sub: item.sub
+        }));
+
+        // ===== SCENE SETUP =====
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x030102, 0.002);
+
+        const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 2000);
+        camera.position.set(0, 40, 120);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
+        container.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true; controls.dampingFactor = 0.03;
+        controls.autoRotate = true; controls.autoRotateSpeed = 0.2;
+        controls.maxDistance = 350; controls.minDistance = 25;
+
+        const renderScene = new RenderPass(scene, camera);
+        const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 2.0, 0.8, 0.1);
+        const composer = new EffectComposer(renderer);
+        composer.addPass(renderScene); composer.addPass(bloomPass);
+
+        // Agujero Negro
+        const bhGeometry = new THREE.SphereGeometry(12, 64, 64);
+        const bhMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        scene.add(new THREE.Mesh(bhGeometry, bhMaterial));
+
+        // Disco de Acreción
+        const diskGeometry = new THREE.PlaneGeometry(100, 100, 128, 128);
+        const diskShaderMaterial = new THREE.ShaderMaterial({
+            uniforms: { time: { value: 0.0 }, color1: { value: new THREE.Color(0xffd1dc) }, color2: { value: new THREE.Color(0xff5580) } },
+            vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+            fragmentShader: `
+                uniform float time; uniform vec3 color1; uniform vec3 color2; varying vec2 vUv;
+                float rand(vec2 co){ return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453); }
+                void main() {
+                    vec2 p = -1.0 + 2.0 * vUv; float r = length(p); float a = atan(p.y, p.x);
+                    if(r < 0.25) discard;
+                    float f = sin(r * 30.0 - time * 2.0 + a * 4.0) + sin(r * 50.0 - time * 4.0 + a * 8.0) * 0.5;
+                    vec3 col = mix(color2, color1, f * 0.5 + 0.5);
+                    float glow = 0.08 / (r - 0.2); float edgeFade = smoothstep(1.0, 0.3, r);
+                    float alpha = edgeFade * glow * (f * 0.5 + 0.8) + (rand(p * time * 0.001) * 0.1);
+                    gl_FragColor = vec4(col * alpha * 1.5, alpha);
+                }
+            `,
+            transparent: true, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false
+        });
+        const accretionDisk = new THREE.Mesh(diskGeometry, diskShaderMaterial);
+        accretionDisk.rotation.x = Math.PI / 2.1;
+        scene.add(accretionDisk);
+
+        // Estrellas
+        const starGeo = new THREE.BufferGeometry();
+        const starPos = new Float32Array(15000 * 3);
+        for(let i = 0; i < 15000; i++) {
+            const r = 25 + Math.pow(Math.random(), 2) * 250;
+            const theta = Math.random() * 2 * Math.PI;
+            const phi = Math.acos((Math.random() * 2 - 1) * 0.1);
+            starPos[i*3] = r * Math.sin(phi) * Math.cos(theta);
+            starPos[i*3+1] = r * Math.cos(phi) * (Math.random() * 0.6);
+            starPos[i*3+2] = r * Math.sin(phi) * Math.sin(theta);
+        }
+        starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+        const starMat = new THREE.PointsMaterial({ size: 0.6, color: 0xffe6ea, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
+        const stars = new THREE.Points(starGeo, starMat);
+        scene.add(stars);
+
+        // ===== EMOJIS SPRITES =====
+        const interactiveSprites = [];
+
+        function createEmojiHologramSprite(emojiText, colorHex) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512; canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+            const gradient = ctx.createRadialGradient(256, 256, 30, 256, 256, 220);
+            gradient.addColorStop(0, colorHex);
+            gradient.addColorStop(0.5, colorHex + '66');
+            gradient.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 512, 512);
+            ctx.font = '160px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
+            ctx.shadowBlur = 20;
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(emojiText, 256, 275);
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.colorSpace = THREE.SRGBColorSpace;
+            const material = new THREE.SpriteMaterial({ map: texture, transparent: true, blending: THREE.NormalBlending, depthWrite: false });
+            const sprite = new THREE.Sprite(material);
+            sprite.scale.set(16, 16, 1);
+            return sprite;
+        }
+
+        // Reconstruir textura del sprite con nuevo color de aura (para marcar leídos)
+        function rebuildSpriteTexture(sprite, emojiText, colorHex) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512; canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+            const gradient = ctx.createRadialGradient(256, 256, 30, 256, 256, 220);
+            gradient.addColorStop(0, colorHex);
+            gradient.addColorStop(0.5, colorHex + '99');
+            gradient.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 512, 512);
+            ctx.font = '160px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.shadowColor = '#87ceeb';
+            ctx.shadowBlur = 30;
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(emojiText, 256, 275);
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.colorSpace = THREE.SRGBColorSpace;
+            // Dispose old texture to free memory
+            if (sprite.material.map) sprite.material.map.dispose();
+            sprite.material.map = texture;
+            sprite.material.needsUpdate = true;
+        }
+
+        interactiveData.forEach((data, index) => {
+            const sprite = createEmojiHologramSprite(data.emoji, data.color);
+            const angle = (index / interactiveData.length) * Math.PI * 4 + Math.random();
+            const distance = 40 + (Math.random() * 100);
+            const height = (Math.random() - 0.5) * 60;
+            sprite.position.set(Math.cos(angle) * distance, height, Math.sin(angle) * distance);
+            sprite.userData = { data, angle, distance, baseY: height, speed: 0.001 + Math.random() * 0.002, bobSpeed: 1 + Math.random() * 2, originalScale: 16, explored: false };
+            scene.add(sprite);
+            interactiveSprites.push(sprite);
+        });
+
+        // ===== INTERACCIÓN =====
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        const crosshair = document.getElementById('crosshair');
+        const cardModal = document.getElementById('message-card');
+        let exploredCount = 0;
+        const totalSprites = interactiveSprites.length;
+
+        window.addEventListener('mousemove', (event) => {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        });
+
+        window.addEventListener('click', () => {
+            if (cardModal.classList.contains('active')) return;
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(interactiveSprites);
+            if (intersects.length > 0) {
+                const sprite = intersects[0].object;
+                const data = sprite.userData.data;
+
+                // Marcar como explorado
+                if (!sprite.userData.explored) {
+                    sprite.userData.explored = true;
+                    exploredCount++;
+                    document.getElementById('explored-count').textContent = exploredCount;
+                    document.getElementById('progress-bar-fill').style.width = (exploredCount / totalSprites * 100) + '%';
+                    // Cambiar aura a azul cielo
+                    rebuildSpriteTexture(sprite, sprite.userData.data.emoji, '#87ceeb');
+                }
+
+                sprite.scale.set(24, 24, 1);
+                setTimeout(() => sprite.scale.set(16, 16, 1), 300);
+
+                document.getElementById('card-icon').innerText = data.emoji;
+                document.getElementById('card-icon').style.textShadow = `0 0 20px ${data.color}`;
+                document.getElementById('card-title').innerText = 'Por qué eres irremplazable';
+                document.getElementById('card-text').innerText = data.card;
+                document.getElementById('card-subtext').innerText = data.sub;
+                cardModal.classList.add('active');
+            }
+        });
+
+        document.getElementById('btn-close').addEventListener('click', () => {
+            cardModal.classList.remove('active');
+            // Contar cuántos sprites están realmente explorados
+            const realExplored = interactiveSprites.filter(s => s.userData.explored).length;
+            document.getElementById('explored-count').textContent = realExplored;
+            document.getElementById('progress-bar-fill').style.width = (realExplored / interactiveSprites.length * 100) + '%';
+            exploredCount = realExplored;
+            // Mostrar pantalla final cuando todos estén explorados
+            if (realExplored >= interactiveSprites.length) {
+                setTimeout(() => {
+                    document.getElementById('final-screen').classList.add('visible');
+                    playMusic();
+                }, 800);
+            }
+        });
+
+        document.getElementById('btn-final-close').addEventListener('click', () => {
+            document.getElementById('final-screen').classList.remove('visible');
+            pauseMusic();
+        });
+
+        // ===== ANIMACIÓN =====
+        const clock = new THREE.Clock();
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsedTime = clock.getElapsedTime();
+            controls.update();
+            diskShaderMaterial.uniforms.time.value = elapsedTime;
+            stars.rotation.y = elapsedTime * 0.005;
+
+            interactiveSprites.forEach((sprite) => {
+                const ud = sprite.userData;
+                ud.angle += ud.speed;
+                sprite.position.x = Math.cos(ud.angle) * ud.distance;
+                sprite.position.z = Math.sin(ud.angle) * ud.distance;
+                sprite.position.y = ud.baseY + Math.sin(elapsedTime * ud.bobSpeed + ud.angle) * 3;
+                const pulse = ud.originalScale + Math.sin(elapsedTime * 3 + ud.angle) * 1.5;
+                if(sprite.scale.x < 20) sprite.scale.set(pulse, pulse, 1);
+            });
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(interactiveSprites);
+            if(intersects.length > 0) {
+                crosshair.classList.add('active'); document.body.style.cursor = 'pointer';
+            } else {
+                crosshair.classList.remove('active'); document.body.style.cursor = 'default';
+            }
+
+            composer.render();
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // ===== MÚSICA (archivo local mp3) =====
+        const audioPlayer = document.getElementById('audio-player');
+        const btnMusic = document.getElementById('btn-music');
+        const musicBarsEl = document.getElementById('music-bars');
+
+        function playMusic() {
+            audioPlayer.volume = 0.5;
+            audioPlayer.play().catch(() => {});
+            if (btnMusic) { btnMusic.textContent = '⏸'; }
+            if (musicBarsEl) { musicBarsEl.classList.remove('paused'); }
+        }
+        function pauseMusic() {
+            audioPlayer.pause();
+            if (btnMusic) { btnMusic.textContent = '♪'; }
+            if (musicBarsEl) { musicBarsEl.classList.add('paused'); }
+        }
+
+        if (btnMusic) {
+            btnMusic.addEventListener('click', () => {
+                if (!audioPlayer.paused) pauseMusic(); else playMusic();
+            });
+        }
+
+        document.getElementById('btn-enter').addEventListener('click', () => {
+            const intro = document.getElementById('intro-screen');
+            intro.style.opacity = 0;
+            setTimeout(() => intro.style.display = 'none', 2500);
+            const targetZ = camera.position.z;
+            camera.position.z = targetZ + 100;
+            const introInterval = setInterval(() => {
+                camera.position.z -= (camera.position.z - targetZ) * 0.05;
+                if(Math.abs(camera.position.z - targetZ) < 0.1) clearInterval(introInterval);
+            }, 16);
+        });
+
+        animate();
+    </script>
+</body>
+</html>
